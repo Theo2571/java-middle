@@ -64,7 +64,10 @@ public class StatusService {
 
         Instant changedAt = Instant.now();
         candidate.setStatus(newStatus);
-        candidateRepository.save(candidate);
+        // saveAndFlush (not save): @PreUpdate only fires at flush time, so a
+        // plain save() would leave candidate.updatedAt stale for the response
+        // built below, before the transaction commits.
+        candidateRepository.saveAndFlush(candidate);
 
         statusHistoryRepository.save(StatusHistory.builder()
                 .id(UUID.randomUUID())

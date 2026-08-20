@@ -21,10 +21,10 @@ public class StatusChangedProducer {
 
     private static final Logger log = LoggerFactory.getLogger(StatusChangedProducer.class);
 
-    private final KafkaTemplate<String, StatusChangedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final String topic;
 
-    public StatusChangedProducer(KafkaTemplate<String, StatusChangedEvent> kafkaTemplate,
+    public StatusChangedProducer(KafkaTemplate<String, Object> kafkaTemplate,
                                   @Value("${app.kafka.topics.status-changed}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;

@@ -33,8 +33,8 @@ spring:
         spring.json.value.default.type: kg.tunduk.cvscan.candidate.dto.event.CvParsedEvent
         spring.json.use.type.headers: false
     producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # key/value serializers are wired programmatically in KafkaProducerConfig
+      # (using the application's own ObjectMapper), not via these properties.
       properties:
         spring.json.add.type.headers: false
 

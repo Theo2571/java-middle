@@ -83,7 +83,10 @@ public class CandidateService {
         }
         mapper.updateEntity(candidate, request);
         try {
-            candidate = candidateRepository.save(candidate);
+            // saveAndFlush (not save): @PreUpdate only fires at flush time, so a
+            // plain save() would leave candidate.updatedAt stale for the response
+            // built below, before the transaction commits.
+            candidate = candidateRepository.saveAndFlush(candidate);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateEmailException(request.email());
         }
