@@ -1,6 +1,8 @@
 package kg.tunduk.cvscan.candidate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import kg.tunduk.cvscan.candidate.dto.CandidatePage;
 import kg.tunduk.cvscan.candidate.dto.CandidateResponse;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/candidates")
 public class CandidateController {
@@ -43,8 +47,8 @@ public class CandidateController {
                                @RequestParam(required = false) CandidateStatus status,
                                @RequestParam(required = false) String position,
                                @RequestParam(required = false) String search,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(defaultValue = "0") @Min(0) int page,
+                               @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
                                @RequestParam(required = false) String sort) {
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
         return candidateService.list(verdict, status, position, search, pageable);

@@ -48,7 +48,7 @@ class CvParsedConsumerTest {
 
         consumer.onMessage(event);
 
-        verify(candidateRepository).save(argThat(candidate ->
+        verify(candidateRepository).saveAndFlush(argThat(candidate ->
                 candidate.getId().equals(event.candidateId())
                         && candidate.getStatus() == CandidateStatus.NEW
                         && candidate.getParsedAt().equals(event.parsedAt())));
@@ -61,7 +61,7 @@ class CvParsedConsumerTest {
 
         consumer.onMessage(event);
 
-        verify(candidateRepository, never()).save(any());
+        verify(candidateRepository, never()).saveAndFlush(any());
     }
 
     private CvParsedEvent sampleEvent() {

@@ -43,7 +43,12 @@ public class CvParsedConsumer {
 
         Candidate candidate = mapper.fromEvent(event);
         try {
-            candidateRepository.save(candidate);
+            // saveAndFlush (not save): candidateId is an assigned (non-generated)
+            // key, so a plain save() only schedules the INSERT for the next flush
+            // instead of executing it now - a concurrent redelivery's constraint
+            // violation would otherwise surface at transaction commit, past this
+            // try/catch, crashing the listener instead of being logged as a no-op.
+            candidateRepository.saveAndFlush(candidate);
             log.info("Candidate created from cv.parsed event: eventId={}, candidateId={}",
                     event.eventId(), event.candidateId());
         } catch (DataIntegrityViolationException e) {

@@ -118,6 +118,28 @@ class CandidateApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.error").value("CANDIDATE_NOT_FOUND"));
     }
 
+    @Test
+    void listWithInvalidEnumQueryParamReturns400() throws Exception {
+        mockMvc.perform(get("/api/v1/candidates").param("verdict", "NOT_A_REAL_VERDICT"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void listWithOutOfRangePageOrSizeReturns400() throws Exception {
+        mockMvc.perform(get("/api/v1/candidates").param("page", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+
+        mockMvc.perform(get("/api/v1/candidates").param("size", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+
+        mockMvc.perform(get("/api/v1/candidates").param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+    }
+
     private void seedCandidate(String id, String email, Verdict verdict, CandidateStatus status, String name) {
         seedCandidate(id, email, verdict, status, name, "java-middle");
     }

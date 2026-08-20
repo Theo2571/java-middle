@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         List<ErrorDetail> details = ex.getConstraintViolations().stream()
-                .map(violation -> new ErrorDetail(violation.getPropertyPath().toString(), violation.getMessage()))
+                .map(violation -> new ErrorDetail(lastPathSegment(violation.getPropertyPath().toString()), violation.getMessage()))
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Ошибка валидации входных данных", details, request);
     }
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Ошибка валидации входных данных", null, request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        List<ErrorDetail> details = List.of(new ErrorDetail(ex.getName(), "Некорректное значение параметра"));
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Ошибка валидации входных данных", details, request);
     }
 
     @ExceptionHandler(CandidateNotFoundException.class)
@@ -60,6 +67,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error handling {} {}", request.getMethod(), request.getRequestURI(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Внутренняя ошибка сервера", null, request);
+    }
+
+    private String lastPathSegment(String propertyPath) {
+        int lastDot = propertyPath.lastIndexOf('.');
+        return lastDot < 0 ? propertyPath : propertyPath.substring(lastDot + 1);
     }
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String error, String message,

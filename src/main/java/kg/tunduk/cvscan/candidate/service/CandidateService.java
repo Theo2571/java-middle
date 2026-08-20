@@ -68,7 +68,11 @@ public class CandidateService {
         String id = slugIdGenerator.generate(request.name());
         Candidate candidate = mapper.toEntity(id, request);
         try {
-            candidate = candidateRepository.save(candidate);
+            // saveAndFlush (not save): candidate.id is an assigned (non-generated)
+            // key, so a plain save() only schedules the INSERT for the next flush
+            // instead of executing it now - a unique-constraint violation would
+            // otherwise surface at transaction commit, past this try/catch.
+            candidate = candidateRepository.saveAndFlush(candidate);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateEmailException(request.email());
         }
