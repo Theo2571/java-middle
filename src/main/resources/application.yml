@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: candidate-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/candidate_service
+    username: candidate
+    password: candidate
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: candidate-service
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: kg.tunduk.cvscan.candidate.dto.event
+    producer:
+      properties:
+        spring.json.add.type.headers: false
+
+app:
+  kafka:
+    topics:
+      cv-parsed: cv.parsed
+      status-changed: candidate.status.changed
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    kg.tunduk.cvscan.candidate: INFO

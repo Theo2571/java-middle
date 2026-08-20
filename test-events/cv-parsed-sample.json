@@ -1,0 +1,33 @@
+{
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "candidateId": "asanov-bakyt",
+  "parsedAt": "2026-0 -10T09:00:00Z",
+  "name": "Асанов Бакыт Эркинович",
+  "position": "java-middle",
+  "posLabel": "Java — ведущий программист",
+  "email": "asanov.bakyt@email.com",
+  "phone": "+996 700 111222",
+  "city": "Бишкек",
+  "telegram": "@asanov_dev",
+  "totalExp": "~4 г.",
+  "stack": "Java 17, Spring Boot 3, PostgreSQL, Kafka, Testcontainers, Gradle, Docker",
+  "education": "КГТУ им. Раззакова, ИТ, 2021",
+  "verdict": "FIT",
+  "summary": "Backend-разработчик с 4 годами коммерческого опыта на Java. Уверенно работает со Spring Boot 3, PostgreSQL, Kafka. Пишет тесты с Testcontainers.",
+  "criteria": [
+    { "key": "java_spring",  "result": "OK",      "comment": "Java 17, Spring Boot 3 — 4 года коммерческой разработки" },
+    { "key": "postgres",     "result": "OK",      "comment": "PostgreSQL — основная БД на всех проектах" },
+    { "key": "kafka",        "result": "OK",      "comment": "Kafka — продюсеры, консьюмеры, партиции" },
+    { "key": "tests",        "result": "OK",      "comment": "JUnit5, Mockito, Testcontainers" },
+    { "key": "gradle",       "result": "OK",      "comment": "Gradle — основной инструмент сборки" },
+    { "key": "migrations",   "result": "OK",      "comment": "Flyway — использует на текущем проекте" }
+  ],
+  "experience": [
+    { "period": "2023-03 — н.в.",    "company": "ПКБ «Финтех KG»",  "title": "Java Developer",        "duration": "~2 г." },
+    { "period": "2021-06 — 2023-02", "company": "IT-компания BARS", "title": "Junior Java Developer", "duration": "~1.7 г." }
+  ],
+  "questions": [
+    "Kafka: как настраивали consumer group при нескольких репликах сервиса?",
+    "Testcontainers: насколько быстро запускаются тесты, как оптимизировали?"
+  ]
+}

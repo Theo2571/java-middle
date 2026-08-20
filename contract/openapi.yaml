@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: Candidate Service API
+  description: REST API микросервиса управления кандидатами платформы CV-Scan
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+
+  /api/v1/candidates:
+    get:
+      summary: Список кандидатов с фильтрацией и пагинацией
+      operationId: listCandidates
+      parameters:
+        - name: verdict
+          in: query
+          schema:
+            $ref: '#/components/schemas/Verdict'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CandidateStatus'
+        - name: position
+          in: query
+          schema:
+            type: string
+            example: java-middle
+        - name: search
+          in: query
+          description: Поиск по имени (ILIKE)
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: sort
+          in: query
+          description: "Поле и направление: name,asc | totalExp,desc | createdAt,desc"
+          schema:
+            type: string
+            default: createdAt,desc
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidatePage'
+
+    post:
+      summary: Создание кандидата
+      operationId: createCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateWriteRequest'
+      responses:
+        '201':
+          description: Кандидат создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /api/v1/candidates/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Получить кандидата по ID
+      operationId: getCandidate
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Обновить кандидата
+      operationId: updateCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateWriteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+    delete:
+      summary: Удалить кандидата
+      operationId: deleteCandidate
+      responses:
+        '204':
+          description: Удалён
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/v1/candidates/{id}/status:
+    patch:
+      summary: Сменить статус кандидата
+      operationId: changeStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusChangeRequest'
+      responses:
+        '200':
+          description: Статус изменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableError'
+
+  /api/v1/candidates/{id}/status-history:
+    get:
+      summary: История изменений статуса (убывание по дате)
+      operationId: getStatusHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusHistoryEntry'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+
+    Verdict:
+      type: string
+      enum: [FIT, PARTIAL, NO_FIT]
+
+    CandidateStatus:
+      type: string
+      enum: [NEW, IN_REVIEW, INVITED, APPROVED, REJECTED]
+
+    CriteriaResult:
+      type: string
+      enum: [OK, PARTIAL, NO]
+
+    CriteriaItem:
+      type: object
+      required: [key, result, comment]
+      properties:
+        key:
+          type: string
+        result:
+          $ref: '#/components/schemas/CriteriaResult'
+        comment:
+          type: string
+
+    ExperienceItem:
+      type: object
+      required: [period, company, title, duration]
+      properties:
+        period:
+          type: string
+          example: "2022-01 — н.в."
+        company:
+          type: string
+        title:
+          type: string
+        duration:
+          type: string
+          example: "2 г."
+
+    CandidateWriteRequest:
+      type: object
+      required: [name, email, position, verdict]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+\d[\d ]{6,20}$'
+          example: "+996 700 111222"
+          nullable: true
+        position:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          example: java-middle
+        posLabel:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        telegram:
+          type: string
+          nullable: true
+        totalExp:
+          type: string
+          nullable: true
+          example: "~3.5 г."
+        stack:
+          type: string
+          nullable: true
+        education:
+          type: string
+          nullable: true
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        summary:
+          type: string
+          nullable: true
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriteriaItem'
+          default: []
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExperienceItem'
+          default: []
+        questions:
+          type: array
+          items:
+            type: string
+          default: []
+
+    CandidateResponse:
+      allOf:
+        - $ref: '#/components/schemas/CandidateWriteRequest'
+        - type: object
+          required: [id, status, createdAt, updatedAt]
+          properties:
+            id:
+              type: string
+            status:
+              $ref: '#/components/schemas/CandidateStatus'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    CandidatePage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidateResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    StatusChangeRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/CandidateStatus'
+        comment:
+          type: string
+          nullable: true
+
+    StatusHistoryEntry:
+      type: object
+      required: [id, candidateId, fromStatus, toStatus, changedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        candidateId:
+          type: string
+        fromStatus:
+          $ref: '#/components/schemas/CandidateStatus'
+        toStatus:
+          $ref: '#/components/schemas/CandidateStatus'
+        comment:
+          type: string
+          nullable: true
+        changedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [status, error, message, timestamp, path]
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+
+  responses:
+    ValidationError:
+      description: Ошибка валидации входных данных
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            error: VALIDATION_ERROR
+            message: "Ошибка валидации входных данных"
+            details:
+              - field: email
+                message: "Некорректный формат email"
+              - field: name
+                message: "Обязательное поле"
+            timestamp: "2026-06-04T12:00:00Z"
+            path: "/api/v1/candidates"
+
+    NotFoundError:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            error: CANDIDATE_NOT_FOUND
+            message: "Кандидат 'ivanov' не найден"
+            timestamp: "2026-06-04T12:00:00Z"
+            path: "/api/v1/candidates/ivanov"
+
+    ConflictError:
+      description: Конфликт — дублирующийся email
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 409
+            error: DUPLICATE_EMAIL
+            message: "Кандидат с email 'ivanov@email.com' уже существует"
+            timestamp: "2026-06-04T12:00:00Z"
+            path: "/api/v1/candidates"
+
+    UnprocessableError:
+      description: Недопустимый переход статуса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 422
+            error: INVALID_STATUS_TRANSITION
+            message: "Переход NEW → REJECTED недопустим"
+            timestamp: "2026-06-04T12:00:00Z"
+            path: "/api/v1/candidates/ivanov/status"
