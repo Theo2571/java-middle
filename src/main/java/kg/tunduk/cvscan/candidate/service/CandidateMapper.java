@@ -7,6 +7,7 @@ import kg.tunduk.cvscan.candidate.dto.event.CvParsedEvent;
 import kg.tunduk.cvscan.candidate.model.Candidate;
 import kg.tunduk.cvscan.candidate.model.CandidateStatus;
 import kg.tunduk.cvscan.candidate.model.StatusHistory;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -68,9 +69,13 @@ public class CandidateMapper {
                 .verdict(event.verdict())
                 .status(CandidateStatus.NEW)
                 .summary(event.summary())
-                .criteria(event.criteria())
-                .experience(event.experience())
-                .questions(event.questions())
+                // criteria/experience/questions are NOT NULL JSONB columns; a
+                // producer omitting these arrays must not turn into a DB
+                // constraint violation that CvParsedConsumer would otherwise
+                // misreport as a duplicate-event no-op.
+                .criteria(event.criteria() != null ? event.criteria() : List.of())
+                .experience(event.experience() != null ? event.experience() : List.of())
+                .questions(event.questions() != null ? event.questions() : List.of())
                 .parsedAt(event.parsedAt())
                 .build();
     }
