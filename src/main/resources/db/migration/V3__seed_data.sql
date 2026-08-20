@@ -1,0 +1,155 @@
+-- Seed data: 12 candidates spanning all verdicts and statuses, plus matching
+-- status history, so the REST API (filtering, pagination, history) is fully
+-- testable on first boot without needing to publish any Kafka events first.
+
+INSERT INTO candidates
+    (id, name, email, phone, position, pos_label, city, telegram, total_exp, stack, education,
+     verdict, status, summary, criteria, experience, questions, parsed_at, created_at, updated_at)
+VALUES
+('nurlanov-adilet', 'Нурланов Адилет Максатович', 'nurlanov.adilet@email.com', '+996 700 111001',
+ 'java-middle', 'Java — ведущий программист', 'Бишкек', '@nurlanov_dev', '~3 г.',
+ 'Java 17, Spring Boot 3, PostgreSQL, Kafka, Docker', 'КНУ, Информатика, 2021',
+ 'FIT', 'APPROVED', 'Уверенный backend-разработчик, стек полностью совпадает с требованиями.',
+ '[{"key":"java_spring","result":"OK","comment":"Java 17, Spring Boot 3 — 3 года коммерческого опыта"},
+   {"key":"postgres","result":"OK","comment":"PostgreSQL — основная БД на текущем проекте"},
+   {"key":"kafka","result":"OK","comment":"Kafka — продюсеры и консьюмеры в проде"}]',
+ '[{"period":"2023-06 — н.в.","company":"ТехноСофт","title":"Java Developer","duration":"~3 г."}]',
+ '["Kafka: как настраивали consumer group?", "Как тестировали интеграции с БД?"]',
+ NULL, '2026-08-01 09:00:00+00', '2026-08-04 09:00:00+00'),
+
+('toktosunova-aigul', 'Токтосунова Айгуль Бакытовна', 'toktosunova.aigul@email.com', '+996 700 111002',
+ 'java-middle', 'Java — ведущий программист', 'Бишкек', '@toktosunova_dev', '~4 г.',
+ 'Java, Spring Boot, PostgreSQL, Kafka, Testcontainers', 'КГТУ им. Раззакова, ИТ, 2020',
+ 'FIT', 'INVITED', 'Крепкий middle с опытом тестирования через Testcontainers.',
+ '[{"key":"java_spring","result":"OK","comment":"4 года на Spring Boot"},
+   {"key":"tests","result":"OK","comment":"JUnit5, Mockito, Testcontainers"}]',
+ '[{"period":"2022-02 — н.в.","company":"ФинТех KG","title":"Java Developer","duration":"~4 г."}]',
+ '["Как оптимизировали скорость интеграционных тестов?"]',
+ NULL, '2026-08-02 10:00:00+00', '2026-08-04 10:00:00+00'),
+
+('dzhumaliev-ruslan', 'Джумалиев Руслан Талантович', 'dzhumaliev.ruslan@email.com', '+996 700 111003',
+ 'java-senior', 'Java — старший программист', 'Ош', '@dzhumaliev_dev', '~6 г.',
+ 'Java, Spring, PostgreSQL, Kafka, Kubernetes', 'ОшГУ, Информатика, 2018',
+ 'FIT', 'IN_REVIEW', 'Опытный разработчик, есть опыт менторства.',
+ '[{"key":"java_spring","result":"OK","comment":"6 лет коммерческой разработки"},
+   {"key":"kafka","result":"OK","comment":"Проектировал схему топиков"}]',
+ '[{"period":"2020-01 — н.в.","company":"БигДата KG","title":"Senior Java Developer","duration":"~6 г."}]',
+ '["Опыт менторства junior-разработчиков?"]',
+ NULL, '2026-08-03 11:00:00+00', '2026-08-04 11:00:00+00'),
+
+('sadykova-nazira', 'Садыкова Назира Эркиновна', 'sadykova.nazira@email.com', '+996 700 111004',
+ 'java-middle', 'Java — ведущий программист', 'Бишкек', '@sadykova_dev', '~2.5 г.',
+ 'Java, Spring Boot, PostgreSQL', 'КНУ, Информатика, 2022',
+ 'PARTIAL', 'IN_REVIEW', 'Java и Spring Boot есть, но Kafka не упоминается.',
+ '[{"key":"java_spring","result":"OK","comment":"2.5 года на Spring Boot"},
+   {"key":"kafka","result":"NO","comment":"Kafka не упомянута в резюме"}]',
+ '[{"period":"2023-11 — н.в.","company":"СтартапХаб","title":"Java Developer","duration":"~2.5 г."}]',
+ '["Есть ли опыт работы с брокерами сообщений?"]',
+ NULL, '2026-08-04 09:30:00+00', '2026-08-05 09:30:00+00'),
+
+('abdyraimov-eldar', 'Абдыраимов Эльдар Жаныбекович', 'abdyraimov.eldar@email.com', '+996 700 111005',
+ 'python-middle', 'Python — ведущий программист', 'Бишкек', '@abdyraimov_dev', '~3 г.',
+ 'Python, FastAPI, PostgreSQL, Celery', 'КНУ, Прикладная математика, 2021',
+ 'PARTIAL', 'NEW', 'Сильный Python-стек, требуется собеседование на позицию Java.',
+ '[{"key":"python","result":"OK","comment":"FastAPI, Celery — уверенное владение"},
+   {"key":"java_spring","result":"NO","comment":"Java не упомянута"}]',
+ '[{"period":"2023-01 — н.в.","company":"ДатаЛаб","title":"Python Developer","duration":"~3 г."}]',
+ '["Рассматривает ли кандидат переход на Java-стек?"]',
+ NULL, '2026-08-05 12:00:00+00', '2026-08-05 12:00:00+00'),
+
+('karimova-dilnoza', 'Каримова Дильноза Санжаровна', 'karimova.dilnoza@email.com', '+996 700 111006',
+ 'java-middle', 'Java — ведущий программист', 'Бишкек', '@karimova_dev', '~1.5 г.',
+ 'Java, Spring MVC', 'БГУ, Информатика, 2023',
+ 'PARTIAL', 'REJECTED', 'Опыт коммерческой разработки меньше требуемого.',
+ '[{"key":"java_spring","result":"PARTIAL","comment":"Только Spring MVC, без Spring Boot 3"},
+   {"key":"postgres","result":"PARTIAL","comment":"Базовый опыт с БД"}]',
+ '[{"period":"2024-06 — н.в.","company":"ВебСтудия","title":"Junior Java Developer","duration":"~1.5 г."}]',
+ '["Готовность работать с Spring Boot 3 и Kafka?"]',
+ NULL, '2026-08-06 08:45:00+00', '2026-08-08 08:45:00+00'),
+
+('moldalieva-cholpon', 'Молдалиева Чолпон Нурлановна', 'moldalieva.cholpon@email.com', '+996 700 111007',
+ 'java-junior', 'Java — младший программист', 'Каракол', '@moldalieva_dev', '~0.5 г.',
+ 'Java, Servlets', 'ИГУ, Информатика, 2025',
+ 'NO_FIT', 'REJECTED', 'Стек не соответствует требованиям вакансии middle.',
+ '[{"key":"java_spring","result":"NO","comment":"Spring не упомянут вообще"},
+   {"key":"tests","result":"NO","comment":"Тесты не упомянуты"}]',
+ '[{"period":"2025-09 — н.в.","company":"ИТ-Академия","title":"Trainee Developer","duration":"~0.5 г."}]',
+ '["Готовность проходить дополнительное обучение?"]',
+ NULL, '2026-08-07 14:20:00+00', '2026-08-09 14:20:00+00'),
+
+('isakov-timur', 'Исаков Тимур Бекович', 'isakov.timur@email.com', '+996 700 111008',
+ 'java-middle', 'Java — ведущий программист', 'Бишкек', '@isakov_dev', '~1 г.',
+ 'Java, Hibernate', 'КГТУ им. Раззакова, ИТ, 2024',
+ 'NO_FIT', 'NEW', 'Опыт менее года, требования по стеку не закрыты.',
+ '[{"key":"java_spring","result":"NO","comment":"Spring Boot не упомянут"},
+   {"key":"kafka","result":"NO","comment":"Kafka не упомянута"}]',
+ '[{"period":"2025-04 — н.в.","company":"СофтГрупп","title":"Junior Java Developer","duration":"~1 г."}]',
+ '["Есть ли опыт со Spring Boot?"]',
+ NULL, '2026-08-08 09:00:00+00', '2026-08-08 09:00:00+00'),
+
+('bekova-aisuluu', 'Бекова Айсулуу Мирлановна', 'bekova.aisuluu@email.com', '+996 700 111009',
+ 'devops-middle', 'DevOps — ведущий инженер', 'Бишкек', '@bekova_dev', '~3 г.',
+ 'Docker, Kubernetes, Terraform, Kafka', 'КНУ, Информатика, 2021',
+ 'FIT', 'NEW', 'Сильный DevOps-профиль с опытом эксплуатации Kafka-кластеров.',
+ '[{"key":"kafka","result":"OK","comment":"Эксплуатация Kafka-кластеров в проде"},
+   {"key":"docker","result":"OK","comment":"Docker, Kubernetes — 3 года"}]',
+ '[{"period":"2023-02 — н.в.","company":"КлаудОпс","title":"DevOps Engineer","duration":"~3 г."}]',
+ '["Опыт настройки мониторинга Kafka-брокеров?"]',
+ NULL, '2026-08-09 10:15:00+00', '2026-08-09 10:15:00+00'),
+
+('orozbekov-nurbek', 'Орозбеков Нурбек Азаматович', 'orozbekov.nurbek@email.com', '+996 700 111010',
+ 'java-senior', 'Java — старший программист', 'Бишкек', '@orozbekov_dev', '~7 г.',
+ 'Java, Spring, PostgreSQL, Kafka, Microservices', 'КНУ, Информатика, 2017',
+ 'FIT', 'APPROVED', 'Senior-разработчик, полностью закрывает требования вакансии.',
+ '[{"key":"java_spring","result":"OK","comment":"7 лет, архитектура микросервисов"},
+   {"key":"kafka","result":"OK","comment":"Проектирование event-driven систем"}]',
+ '[{"period":"2019-03 — н.в.","company":"ИнтерБанк Технологии","title":"Senior Java Developer","duration":"~7 г."}]',
+ '["Опыт проектирования систем на Kafka с нуля?"]',
+ NULL, '2026-08-10 11:30:00+00', '2026-08-13 11:30:00+00'),
+
+('tashieva-gulnara', 'Ташиева Гульнара Омурбековна', 'tashieva.gulnara@email.com', '+996 700 111011',
+ 'java-middle', 'Java — ведущий программист', 'Джалал-Абад', '@tashieva_dev', '~0.8 г.',
+ 'Java, основы Spring', 'ЖАГУ, Информатика, 2025',
+ 'NO_FIT', 'NEW', 'Опыт менее года, стек изучен только на базовом уровне.',
+ '[{"key":"java_spring","result":"PARTIAL","comment":"Только основы Spring"},
+   {"key":"postgres","result":"NO","comment":"БД не упомянута"}]',
+ '[{"period":"2025-08 — н.в.","company":"ИТ-Старт","title":"Junior Java Developer","duration":"~0.8 г."}]',
+ '["Готовность к интенсивному обучению на проекте?"]',
+ NULL, '2026-08-11 13:00:00+00', '2026-08-11 13:00:00+00'),
+
+('akmatov-bakdoolot', 'Акматов Бакдоолот Уланович', 'akmatov.bakdoolot@email.com', '+996 700 111012',
+ 'python-middle', 'Python — ведущий программист', 'Бишкек', '@akmatov_dev', '~3.5 г.',
+ 'Python, Django, PostgreSQL, Kafka', 'КНУ, Прикладная математика, 2020',
+ 'PARTIAL', 'INVITED', 'Сильный Python-профиль, опыт с Kafka есть.',
+ '[{"key":"python","result":"OK","comment":"Django, 3.5 года коммерческого опыта"},
+   {"key":"kafka","result":"OK","comment":"Продюсеры и консьюмеры на Python"},
+   {"key":"java_spring","result":"NO","comment":"Java не упомянута"}]',
+ '[{"period":"2022-05 — н.в.","company":"ПэйТех","title":"Python Developer","duration":"~3.5 г."}]',
+ '["Готовность изучить Java для этой позиции?"]',
+ NULL, '2026-08-12 09:45:00+00', '2026-08-14 09:45:00+00');
+
+INSERT INTO candidate_status_history (id, candidate_id, from_status, to_status, comment, changed_at)
+VALUES
+(gen_random_uuid(), 'nurlanov-adilet', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-02 09:00:00+00'),
+(gen_random_uuid(), 'nurlanov-adilet', 'IN_REVIEW', 'INVITED', 'Приглашён на техническое интервью', '2026-08-03 09:00:00+00'),
+(gen_random_uuid(), 'nurlanov-adilet', 'INVITED', 'APPROVED', 'Успешно прошёл собеседование', '2026-08-04 09:00:00+00'),
+
+(gen_random_uuid(), 'toktosunova-aigul', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-03 10:00:00+00'),
+(gen_random_uuid(), 'toktosunova-aigul', 'IN_REVIEW', 'INVITED', 'Приглашена на техническое интервью', '2026-08-04 10:00:00+00'),
+
+(gen_random_uuid(), 'dzhumaliev-ruslan', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-04 11:00:00+00'),
+
+(gen_random_uuid(), 'sadykova-nazira', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-05 09:30:00+00'),
+
+(gen_random_uuid(), 'karimova-dilnoza', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-07 08:45:00+00'),
+(gen_random_uuid(), 'karimova-dilnoza', 'IN_REVIEW', 'REJECTED', 'Недостаточно опыта для позиции middle', '2026-08-08 08:45:00+00'),
+
+(gen_random_uuid(), 'moldalieva-cholpon', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-08 14:20:00+00'),
+(gen_random_uuid(), 'moldalieva-cholpon', 'IN_REVIEW', 'REJECTED', 'Стек не соответствует требованиям', '2026-08-09 14:20:00+00'),
+
+(gen_random_uuid(), 'orozbekov-nurbek', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-11 11:30:00+00'),
+(gen_random_uuid(), 'orozbekov-nurbek', 'IN_REVIEW', 'INVITED', 'Приглашён на техническое интервью', '2026-08-12 11:30:00+00'),
+(gen_random_uuid(), 'orozbekov-nurbek', 'INVITED', 'APPROVED', 'Успешно прошёл собеседование', '2026-08-13 11:30:00+00'),
+
+(gen_random_uuid(), 'akmatov-bakdoolot', 'NEW', 'IN_REVIEW', 'Резюме прошло первичный отбор', '2026-08-13 09:45:00+00'),
+(gen_random_uuid(), 'akmatov-bakdoolot', 'IN_REVIEW', 'INVITED', 'Приглашён на техническое интервью', '2026-08-14 09:45:00+00');
