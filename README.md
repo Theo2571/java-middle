@@ -80,7 +80,12 @@ kcat -C -b localhost:9092 -t candidate.status.changed
   доп. зависимостей) исключает классическую проблему N+1 на `@OneToMany` по построению.
 - **Идемпотентность консьюмера** — ключ `(candidateId, parsedAt)`: проверка
   `existsByIdAndParsedAt` перед вставкой + перехват `DataIntegrityViolationException` как
-  страховка от гонки при повторной доставке (т.к. `id` — первичный ключ).
+  страховка от гонки при повторной доставке (т.к. `id` — первичный ключ). Важная деталь:
+  вставка выполняется через `saveAndFlush`, а не `save` — при `id`, назначаемом приложением
+  (не `@GeneratedValue`), Hibernate откладывает реальный `INSERT` до flush (обычно — до коммита
+  транзакции), то есть нарушение уникальности всплыло бы уже после выхода из `try/catch`. То же
+  самое верно для `CandidateService.create()` (защита от гонки на дублирующийся email). Проверено
+  вручную двумя параллельными `curl`-запросами с одинаковым email: `201` + `409`, а не `500`.
 - **`StatusService`** — единая точка изменения статуса: проверяет переход по таблице
   `Map<CandidateStatus, Set<CandidateStatus>>`, пишет историю и публикует Kafka-событие
   через `@TransactionalEventListener(phase = AFTER_COMMIT)` — событие уходит в Kafka только
@@ -118,13 +123,14 @@ kcat -C -b localhost:9092 -t candidate.status.changed
   в `cv-parsed-bulk.ndjson`.
 - **Интеграционные** (`CandidateApiIntegrationTest`, `KafkaIntegrationTest`, Testcontainers —
   реальные Postgres + Kafka): комбинированная фильтрация, `409` на дублирующийся email,
-  `422` на недопустимый переход, история статусов, создание кандидата из `cv.parsed` и
-  игнорирование дубля через реальный брокер.
+  `422` на недопустимый переход, `400` на некорректные `verdict`/`status`/`page`/`size`,
+  история статусов, создание кандидата из `cv.parsed` и игнорирование дубля через реальный брокер.
 
-`./gradlew test` — **26/26 тестов зелёные** (19 модульных + 7 интеграционных, интеграционные
+`./gradlew test` — **28/28 тестов зелёные** (19 модульных + 9 интеграционных, интеграционные
 прогнаны против реальных Postgres 16 и Kafka через Testcontainers).
 
 Дополнительно всё REST API и Kafka-flow были вручную прогнаны через `docker-compose` +
-`curl`/`kcat` на реальных Postgres/Kafka (не только через тесты) — в процессе найдены и
-исправлены два бага (см. коммит `fix: flush updatedAt before responding, use app ObjectMapper
-for Kafka JSON dates`).
+`curl`/`kcat` на реальных Postgres/Kafka (не только через тесты), включая намеренно
+параллельные запросы для проверки race-condition защиты — в процессе найдены и исправлены
+реальные баги (stale `updatedAt`, Kafka epoch-даты, а также гонка в дублирующем email/Kafka-
+идемпотентности, см. коммиты `fix: flush updatedAt ...` и `fix: close concurrent-race gap ...`).
