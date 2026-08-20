@@ -37,20 +37,27 @@ class CandidateApiIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void listsCandidatesFilteredByVerdictStatusAndSearch() throws Exception {
-        seedCandidate("filter-fit-new", "filter.fit.new@email.com", Verdict.FIT, CandidateStatus.NEW, "Ай Гуль Filterova");
-        seedCandidate("filter-fit-invited", "filter.fit.invited@email.com", Verdict.FIT, CandidateStatus.INVITED, "Бек Нур Filterov");
-        seedCandidate("filter-partial-new", "filter.partial.new@email.com", Verdict.PARTIAL, CandidateStatus.NEW, "Ай Гуль Otherova");
+        // "qa-isolation-test" is a position no seed/other-test candidate uses,
+        // so combining it into every query isolates these assertions from the
+        // 12 seeded candidates (and any leftovers from other test methods)
+        // sharing the same Testcontainers database.
+        String position = "qa-isolation-test";
+        seedCandidate("filter-fit-new", "filter.fit.new@email.com", Verdict.FIT, CandidateStatus.NEW, "Filterova Zulfiya", position);
+        seedCandidate("filter-fit-invited", "filter.fit.invited@email.com", Verdict.FIT, CandidateStatus.INVITED, "Filterov Bekzhan", position);
+        seedCandidate("filter-partial-new", "filter.partial.new@email.com", Verdict.PARTIAL, CandidateStatus.NEW, "Otherova Zulfiya", position);
 
         mockMvc.perform(get("/api/v1/candidates")
                         .param("verdict", "FIT")
                         .param("status", "NEW")
+                        .param("position", position)
                         .param("size", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].id").value("filter-fit-new"));
 
         mockMvc.perform(get("/api/v1/candidates")
-                        .param("search", "Ай Гуль")
+                        .param("search", "Zulfiya")
+                        .param("position", position)
                         .param("size", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(2))
@@ -112,11 +119,15 @@ class CandidateApiIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void seedCandidate(String id, String email, Verdict verdict, CandidateStatus status, String name) {
+        seedCandidate(id, email, verdict, status, name, "java-middle");
+    }
+
+    private void seedCandidate(String id, String email, Verdict verdict, CandidateStatus status, String name, String position) {
         candidateRepository.save(Candidate.builder()
                 .id(id)
                 .name(name)
                 .email(email)
-                .position("java-middle")
+                .position(position)
                 .verdict(verdict)
                 .status(status)
                 .criteria(java.util.List.of())

@@ -1,5 +1,6 @@
 package kg.tunduk.cvscan.candidate.integration;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -15,6 +16,7 @@ import org.testcontainers.utility.DockerImageName;
  * every integration test class instead of restarting per class.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
 
@@ -24,8 +26,12 @@ public abstract class AbstractIntegrationTest {
                     .withUsername("candidate")
                     .withPassword("candidate");
 
+    // confluentinc/cp-kafka (not apache/kafka, used in docker-compose.yml for local dev):
+    // Testcontainers' KafkaContainer wait strategy and bootstrap scripting are built
+    // around the Confluent image layout and log output, apache/kafka's official image
+    // fails its LogMessageWaitStrategy.
     protected static final KafkaContainer KAFKA =
-            new KafkaContainer(DockerImageName.parse("apache/kafka:3.8.0"));
+            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.11"));
 
     static {
         POSTGRES.start();
