@@ -10,6 +10,9 @@ import kg.tunduk.cvscan.candidate.model.CandidateStatus;
 import kg.tunduk.cvscan.candidate.model.Verdict;
 import kg.tunduk.cvscan.candidate.repository.CandidateRepository;
 import kg.tunduk.cvscan.candidate.repository.CandidateSpecifications;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,11 +36,14 @@ public class CandidateService {
 
     @Transactional(readOnly = true)
     public CandidatePage list(Verdict verdict, CandidateStatus status, String position, String search, Pageable pageable) {
-        Specification<Candidate> spec = Specification
-                .where(CandidateSpecifications.hasVerdict(verdict))
-                .and(CandidateSpecifications.hasStatus(status))
-                .and(CandidateSpecifications.hasPosition(position))
-                .and(CandidateSpecifications.nameContains(search));
+        List<Specification<Candidate>> filters = Stream.of(
+                        CandidateSpecifications.hasVerdict(verdict),
+                        CandidateSpecifications.hasStatus(status),
+                        CandidateSpecifications.hasPosition(position),
+                        CandidateSpecifications.nameContains(search))
+                .filter(Objects::nonNull)
+                .toList();
+        Specification<Candidate> spec = Specification.allOf(filters);
 
         Page<Candidate> page = candidateRepository.findAll(spec, pageable);
         return new CandidatePage(
